@@ -51,9 +51,15 @@ type HttpupgradeNetworkConfig struct {
 }
 
 func getInboundOptions(tag string, info *panel.NodeInfo, c *conf.Options) (option.Inbound, error) {
-	addr, err := netip.ParseAddr(c.ListenIP)
-	if err != nil {
-		return option.Inbound{}, fmt.Errorf("the listen ip not vail")
+	var addr netip.Addr
+	var err error
+	if info.Type == "anytls" && c.ListenIP == "0.0.0.0" {
+		addr = netip.IPv6Unspecified()
+	} else {
+		addr, err = netip.ParseAddr(c.ListenIP)
+		if err != nil {
+			return option.Inbound{}, fmt.Errorf("the listen ip not vail")
+		}
 	}
 	listen := option.ListenOptions{
 		Listen:      (*badoption.Addr)(&addr),
